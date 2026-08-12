@@ -1230,6 +1230,7 @@ class ChatDockWidget(QDockWidget):
             translate("ChatDockWidget", "Plan"),
             translate("ChatDockWidget", "Act"),
         ])
+        self.mode_combo.setMinimumWidth(80)
         cfg = get_config()
         self.mode_combo.setCurrentIndex(0 if cfg.mode == "plan" else 1)
         self.mode_combo.currentIndexChanged.connect(self._on_mode_changed)
@@ -1238,7 +1239,7 @@ class ChatDockWidget(QDockWidget):
 
         # Viewport capture toggle
         self._capture_btn = QPushButton(translate("ChatDockWidget", "Capture"))
-        self._capture_btn.setMaximumWidth(70)
+        self._capture_btn.setMinimumWidth(self._capture_btn.sizeHint().width())
         self._capture_btn.setToolTip(translate("ChatDockWidget", "Viewport capture: off"))
         self._capture_btn.clicked.connect(self._cycle_capture_mode)
         header.addWidget(self._capture_btn)
@@ -1255,7 +1256,7 @@ class ChatDockWidget(QDockWidget):
 
         # Settings button
         settings_btn = QPushButton(translate("ChatDockWidget", "Settings"))
-        settings_btn.setMaximumWidth(80)
+        settings_btn.setMinimumWidth(settings_btn.sizeHint().width())
         settings_btn.clicked.connect(self._open_settings)
         header.addWidget(settings_btn)
 
@@ -1308,7 +1309,6 @@ class ChatDockWidget(QDockWidget):
         btn_layout.setSpacing(2)
 
         self._reference_btn = QPushButton(translate("ChatDockWidget", "Reference"))
-        self._reference_btn.setMaximumHeight(20)
         self._reference_btn.setToolTip(translate(
             "ChatDockWidget",
             "Attach the current selection as a reference (e.g. @Pad.Face3)"))
@@ -1316,17 +1316,22 @@ class ChatDockWidget(QDockWidget):
         btn_layout.addWidget(self._reference_btn)
 
         self._attach_btn = QPushButton(translate("ChatDockWidget", "Attach"))
-        self._attach_btn.setMaximumHeight(20)
         self._attach_btn.setToolTip(translate("ChatDockWidget", "Attach a file (image, text, or document)"))
         self._attach_btn.clicked.connect(self._attach_file)
         btn_layout.addWidget(self._attach_btn)
 
         self.send_btn = QPushButton(translate("ChatDockWidget", "Send"))
-        self.send_btn.setMinimumHeight(30)
         self.send_btn.setStyleSheet(
             f"QPushButton {{ background-color: {colors['tool_success_border']}; color: white; "
             f"font-weight: bold; padding: 8px 16px; }}"
         )
+        # Taller than its neighbours: it is the button the panel is for. Never
+        # below its own size hint, though - a minimum under it lets a short
+        # dock squeeze this one button alone (the others keep their hints) and
+        # with its padding and a padded theme's border that cut "Send" in
+        # half. Read after polishing, so the theme's padding is counted.
+        self.send_btn.ensurePolished()
+        self.send_btn.setMinimumHeight(max(40, self.send_btn.sizeHint().height()))
         self.send_btn.clicked.connect(self._send_message)
         btn_layout.addWidget(self.send_btn)
 
@@ -1338,18 +1343,18 @@ class ChatDockWidget(QDockWidget):
         footer = QHBoxLayout()
 
         new_chat_btn = QPushButton(translate("ChatDockWidget", "+ New Chat"))
-        new_chat_btn.setMaximumWidth(100)
+        new_chat_btn.setMinimumWidth(new_chat_btn.sizeHint().width())
         new_chat_btn.clicked.connect(self._new_chat)
         footer.addWidget(new_chat_btn)
 
         load_chat_btn = QPushButton(translate("ChatDockWidget", "Load"))
-        load_chat_btn.setMaximumWidth(60)
+        load_chat_btn.setMinimumWidth(load_chat_btn.sizeHint().width())
         load_chat_btn.setToolTip(translate("ChatDockWidget", "Load a previous chat session"))
         load_chat_btn.clicked.connect(self._load_chat)
         footer.addWidget(load_chat_btn)
 
         save_log_btn = QPushButton(translate("ChatDockWidget", "Save Log"))
-        save_log_btn.setMaximumWidth(80)
+        save_log_btn.setMinimumWidth(save_log_btn.sizeHint().width())
         save_log_btn.setToolTip(translate("ChatDockWidget", "Save session log for debugging"))
         save_log_btn.clicked.connect(self._save_session_log)
         footer.addWidget(save_log_btn)
@@ -1438,8 +1443,9 @@ class ChatDockWidget(QDockWidget):
         """OpenDark/OpenLight theme packs inject global QPushButton styles that
         override padding/margins, causing button text to be clipped.
         Re-applying explicit padding via setStyleSheet restores correct sizing.
-        Each button keeps its construction-time setMaximumWidth(); only the
-        padding stylesheet is reapplied here.
+        Buttons carry no maximum width - only a minimum taken from their
+        sizeHint at construction - so the extra padding can widen them
+        instead of clipping their text; only the padding is reapplied here.
         """
         if theme_name.casefold() in _STYLESHEET_CONFLICT_THEMES:
             for btn in self._theme_ui_conflict_buttons:
