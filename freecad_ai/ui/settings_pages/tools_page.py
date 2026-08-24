@@ -628,6 +628,9 @@ class ToolsPage(SettingsPage):
             elif source == "external":
                 icon = "\u2197"  # ↗
                 tag = "external"
+            elif source == "module":
+                icon = "\u2713"  # ✓
+                tag = "module"
             else:
                 icon = "\u2713"  # ✓
                 tag = "built-in"
@@ -649,8 +652,10 @@ class ToolsPage(SettingsPage):
         can_reset = False
         if 0 <= idx < len(self._skills_status):
             info = self._skills_status[idx]
-            # Can reset if there's a user copy AND a built-in exists
-            can_reset = info["has_user_copy"] and bool(info["builtin_path"])
+            # Can reset if there's a user copy AND a shipped version to fall
+            # back to - either built-in or one shipped by another module.
+            shipped = info["builtin_path"] or info.get("module_path", "")
+            can_reset = info["has_user_copy"] and bool(shipped)
         self._skills_reset_btn.setEnabled(can_reset)
 
     def _reset_skill_to_builtin(self):
