@@ -8,10 +8,11 @@ from ..compat import QtWidgets, QtGui
 from ...agent_recipes import (
     dialable_url, generic_snippets, render_command, reset_recipes,
     valid_recipes)
-from ...i18n import translate
+from ...i18n import translate, translate_branded
 from ...utils.secret_source import (
     SecretSourceError, resolve_secret, secret_source_kind)
 from .base import SettingsPage
+from ...branding import PRODUCT_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -145,18 +146,18 @@ class McpPage(SettingsPage):
 
         server_group_layout.addLayout(server_form)
 
-        self.mcp_server_autostart_check = QCheckBox(translate(
-            "SettingsDialog", "Start the MCP server when FreeCAD starts"))
+        self.mcp_server_autostart_check = QCheckBox(translate_branded(
+            "SettingsDialog", "Start the MCP server when %1 starts"))
         server_group_layout.addWidget(self.mcp_server_autostart_check)
 
         # Unconditional, not shown only for non-loopback values: the loopback
         # default is already reachable by every local process, so hiding the
         # warning there would imply the default is authenticated. It is not,
         # unless a bearer token above is set.
-        mcp_server_warning = QLabel(translate(
+        mcp_server_warning = QLabel(translate_branded(
             "SettingsDialog",
             "Without a bearer token, anything that can reach this address "
-            "can run FreeCAD tools, including arbitrary Python. Keep it on "
+            "can run %1 tools, including arbitrary Python. Keep it on "
             "127.0.0.1 unless you understand the exposure, or set a bearer "
             "token above.\n\n"
             "Leave Allowed Host headers empty for loopback-only access. "
@@ -235,11 +236,11 @@ class McpPage(SettingsPage):
         self.agent_note_label.setOpenExternalLinks(True)
         form.addRow("", self.agent_note_label)
 
-        hint = QLabel(translate(
+        hint = QLabel(translate_branded(
             "SettingsDialog",
             "Values follow the fields above and take effect the next time "
             "the MCP server starts. Edit the command list in config.json "
-            "(mcp_agent_recipes) while FreeCAD is closed: FreeCAD writes "
+            "(mcp_agent_recipes) while %1 is closed: %1 writes "
             "its own copy back on the next save."))
         hint.setWordWrap(True)
         form.addRow("", hint)
@@ -254,7 +255,7 @@ class McpPage(SettingsPage):
         self._agent_valid, warnings = valid_recipes(
             [] if recipes is None else recipes)
         for w in warnings:
-            logger.warning("FreeCAD AI: %s", w)
+            logger.warning("%s: %s", PRODUCT_NAME, w)
         current = self.agent_combo.currentText()
         self.agent_combo.blockSignals(True)
         self.agent_combo.clear()
@@ -349,7 +350,7 @@ class McpPage(SettingsPage):
             return
         self._set_agent_recipes(defaults)
         if backup:
-            logger.info("FreeCAD AI: previous agent commands saved to %s", backup)
+            logger.info("%s: previous agent commands saved to %s", PRODUCT_NAME, backup)
             QMessageBox.information(
                 self, translate("SettingsDialog", "Reset agent commands"),
                 translate("SettingsDialog", "Previous list saved to:")

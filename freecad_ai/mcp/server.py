@@ -13,12 +13,13 @@ from ..tools.registry import ToolRegistry
 from ..core.tool_guidance import TOOL_GUIDANCE
 from . import protocol
 from .transport import StdioServerTransport
+from ..branding import APP_NAME, IS_BRANDED, PRODUCT_NAME
 
 logger = logging.getLogger(__name__)
 
 # Derived, never a literal: this was pinned at "0.1.0" for twenty releases, so
 # every MCP client reported "FreeCAD AI 0.1.0" regardless of what was installed.
-SERVER_INFO = {"name": "FreeCAD AI", "version": __version__}
+SERVER_INFO = {"name": PRODUCT_NAME, "version": __version__}
 # Kept as the name the rest of the tree already imports; the value now lives
 # in the revision table.
 PROTOCOL_VERSION = protocol.DEFAULT_PROTOCOL_VERSION
@@ -27,9 +28,15 @@ PROTOCOL_VERSION = protocol.DEFAULT_PROTOCOL_VERSION
 # server/discover. The intro, then the same tool rules our chat prompt
 # carries (#139): an external agent such as Claude Code otherwise gets none
 # of the modelling know-how. About 1.3k tokens, paid once per agent session.
+# On a branded host an external agent, like the chat model, has no training
+# signal for the brand, so the same FreeCAD API anchor the system prompt uses
+# is stated here too - otherwise it stops writing FreeCAD Python.
 _INTRO = (
-    "Tools for inspecting and modifying geometry in a running FreeCAD "
-    "session. Every call acts on the document that is open right now.")
+    "Tools for inspecting and modifying geometry in a running {} session{}. "
+    "Every call acts on the document that is open right now.").format(
+        APP_NAME,
+        " ({} is built on FreeCAD and scripted with the FreeCAD Python API)".format(
+            APP_NAME) if IS_BRANDED else "")
 
 
 def _agent_order(guidance: str) -> str:

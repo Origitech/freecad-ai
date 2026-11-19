@@ -4,7 +4,7 @@ preference that governs how the last two open a file."""
 import os
 
 from ..compat import QtWidgets, QtCore, QtGui
-from ...i18n import translate
+from ...i18n import translate, translate_branded
 from .base import SettingsPage
 
 QVBoxLayout = QtWidgets.QVBoxLayout
@@ -119,7 +119,7 @@ class ToolsPage(SettingsPage):
         user_tools_layout.addLayout(ut_btn_layout)
 
         self.scan_macros_cb = QCheckBox(
-            translate("SettingsDialog", "Also scan FreeCAD macro directory")
+            translate_branded("SettingsDialog", "Also scan %1 macro directory")
         )
         user_tools_layout.addWidget(self.scan_macros_cb)
 
@@ -151,10 +151,10 @@ class ToolsPage(SettingsPage):
         skills_btn_layout.addStretch()
         skills_layout.addLayout(skills_btn_layout)
 
-        extra_label = QLabel(translate(
+        extra_label = QLabel(translate_branded(
             "SettingsDialog",
             "Extra skill folders (one per line), e.g. ~/.claude/skills. "
-            "Skills there can run Python inside FreeCAD; only add folders you trust."))
+            "Skills there can run Python inside %1; only add folders you trust."))
         extra_label.setWordWrap(True)
         skills_layout.addWidget(extra_label)
         extra_row = QHBoxLayout()
@@ -207,15 +207,15 @@ class ToolsPage(SettingsPage):
         # Editor group — affects Edit/New buttons in User Tools and Hooks above.
         editor_group = QGroupBox(translate("SettingsDialog", "Editor"))
         editor_layout = QVBoxLayout()
-        self.use_external_editor_cb = QCheckBox(translate(
+        self.use_external_editor_cb = QCheckBox(translate_branded(
             "SettingsDialog",
             "Open hooks and user tools in the OS-default editor "
-            "(instead of FreeCAD's docked script editor)"))
-        self.use_external_editor_cb.setToolTip(translate(
+            "(instead of %1's docked script editor)"))
+        self.use_external_editor_cb.setToolTip(translate_branded(
             "SettingsDialog",
             "When enabled, files open via the OS file association "
             "(xdg-open / Launch Services) so this window can stay open. "
-            "When disabled, files open in FreeCAD's docked Gui::PythonEditor — "
+            "When disabled, files open in %1's docked Gui::PythonEditor — "
             "which requires closing this window first."))
         editor_layout.addWidget(self.use_external_editor_cb)
         editor_group.setLayout(editor_layout)
@@ -522,9 +522,9 @@ class ToolsPage(SettingsPage):
         choice = QMessageBox.question(
             self,
             translate("SettingsDialog", "Open Script Editor"),
-            translate(
+            translate_branded(
                 "SettingsDialog",
-                "FreeCAD's script editor is docked behind this dialog. "
+                "%1's script editor is docked behind this dialog. "
                 "The dialog must close so you can reach it.\n\n"
                 "Save your pending settings changes first?"),
             QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel,

@@ -17,6 +17,7 @@ startup, long before a page is first shown.
 
 from ..config import get_config, notify_config_changed, save_current_config
 from ..i18n import QT_TRANSLATE_NOOP
+from ..branding import PRODUCT_NAME
 
 
 def _warn(parent, title, text):
@@ -52,7 +53,7 @@ class _PrefsPageBase:
             try:
                 import FreeCAD
                 FreeCAD.Console.PrintError(
-                    f"FreeCAD AI: {self._TITLE} settings failed to load: {e}\n")
+                    f"{PRODUCT_NAME}: {self._TITLE} settings failed to load: {e}\n")
             except ImportError:
                 pass
 

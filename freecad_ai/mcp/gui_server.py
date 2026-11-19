@@ -18,6 +18,7 @@ import os
 import threading
 
 from ..utils.secret_source import resolve_secret
+from ..branding import APP_NAME, PRODUCT_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -279,8 +280,9 @@ def autostart_mcp_server(cfg, controller=None, log=None, warn=None):
             host, port = resolve_server_address(cfg)
         except Exception:
             host, port = "?", "?"
-        warn("FreeCAD AI: MCP server autostart on %s:%s failed: %s"
-            % (host, port, exc))
+        warn("%s: MCP server autostart on %s:%s failed: %s"
+            % (PRODUCT_NAME, host, port, exc))
         return None
-    log("FreeCAD AI: MCP server started with FreeCAD, listening on %s" % url)
+    log("%s: MCP server started with %s, listening on %s"
+        % (PRODUCT_NAME, APP_NAME, url))
     return url

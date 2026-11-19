@@ -19,6 +19,7 @@ import time
 from dataclasses import dataclass
 
 from ..utils.proc import hidden_process_group_kwargs
+from ..branding import APP_NAME
 
 KEEP_RUNS = 20
 OUTPUT_CAP = 20_000
@@ -208,11 +209,11 @@ def _collect(run_dir, returncode, stopped, duration, timeout):
         error = "" if status == "ok" else res.get("error", "")
     elif sig is not None:
         status, error = "crashed", (
-            "The FreeCAD process crashed ({}); FreeCAD itself is unaffected.\n"
-            "Last lines of its stderr:\n{}".format(_signal_name(sig), tail))
+            "The {0} process crashed ({1}); {0} itself is unaffected.\n"
+            "Last lines of its stderr:\n{2}".format(APP_NAME, _signal_name(sig), tail))
     else:
         status, error = "no_result", (
-            "The FreeCAD process exited with code {} without reporting a result.\n"
-            "Last lines of its stderr:\n{}".format(returncode, tail))
+            "The {} process exited with code {} without reporting a result.\n"
+            "Last lines of its stderr:\n{}".format(APP_NAME, returncode, tail))
     return HeadlessRun(status, stdout, stderr, error, run_dir, returncode,
                        round(duration, 1))

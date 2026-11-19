@@ -152,7 +152,7 @@ def _drop_marker(target: str) -> None:
     marker = os.path.join(target, _ACTIVE_MARKER_FILE)
     with open(marker, "w") as f:
         f.write(
-            "FreeCAD AI v0.13.0+ -- active config dir.\n"
+            f"{PRODUCT_NAME} v0.13.0+ -- active config dir.\n"
             f"Created: {datetime.datetime.now().isoformat()}\n"
             "Removing this file will trigger re-migration on next launch.\n"
         )
@@ -201,7 +201,7 @@ def _sweep_stale_candidates(candidates: list[str], target: str) -> list[str]:
             renamed.append(_rename_with_collision_suffix(c, _DUPLICATE_CLEANUP_SUFFIX))
         except OSError as e:
             print(
-                f"FreeCAD AI: could not rename stale dir {c} ({e!r}); leaving in place",
+                f"{PRODUCT_NAME}: could not rename stale dir {c} ({e!r}); leaving in place",
                 file=sys.stderr,
             )
     return renamed
@@ -281,7 +281,7 @@ def _resolve_config_dir() -> str:
             _sweep_stale_candidates(candidates, target)
         except Exception as e:
             print(
-                f"FreeCAD AI: stale legacy sweep failed ({e!r}); leaving as-is",
+                f"{PRODUCT_NAME}: stale legacy sweep failed ({e!r}); leaving as-is",
                 file=sys.stderr,
             )
         return target
@@ -291,7 +291,7 @@ def _resolve_config_dir() -> str:
         return target
     except Exception as e:
         print(
-            f"FreeCAD AI: config migration to {target} failed ({e!r}); "
+            f"{PRODUCT_NAME}: config migration to {target} failed ({e!r}); "
             f"falling back to a legacy candidate",
             file=sys.stderr,
         )
@@ -361,6 +361,7 @@ def prune_oldest_files(
 # Each preset contains only base_url and default_model (the fields the Settings
 # dialog needs for auto-filling when the user switches providers).
 from .llm.providers import PROVIDERS as _PROVIDERS
+from .branding import APP_NAME, PRODUCT_NAME
 
 PROVIDER_PRESETS = {
     name: {
@@ -1111,8 +1112,9 @@ def _migrate_param_store(cfg: AppConfig) -> None:
         save_config(cfg)
     except OSError as e:
         logger.warning(
-            "FreeCAD AI: could not save preferences migrated from FreeCAD's "
-            "parameter store (%s); will retry at next start", e)
+            "%s: could not save preferences migrated from %s's "
+            "parameter store (%s); will retry at next start",
+            PRODUCT_NAME, APP_NAME, e)
         return
     # RemGroup only detaches a group a Python handle still holds, and the
     # next save writes it back -- so release ours first.
@@ -1178,4 +1180,4 @@ def notify_config_changed() -> None:
         try:
             fn()
         except Exception:
-            logger.exception("FreeCAD AI: config listener %r failed", fn)
+            logger.exception("%s: config listener %r failed", PRODUCT_NAME, fn)

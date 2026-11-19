@@ -8,6 +8,7 @@ import os
 
 from .registry import ToolParam, ToolDefinition, ToolResult
 from ..core.executor import execute_code
+from ..branding import APP_NAME
 
 
 def _coerce_str_list(value):
@@ -40,7 +41,7 @@ def _with_undo(label: str, func):
         return ToolResult(
             success=False,
             output="",
-            error="No active document — open a document in FreeCAD or select its tab.",
+            error=f"No active document — open a document in {APP_NAME} or select its tab.",
         )
     doc.openTransaction(label)
     try:
@@ -3135,7 +3136,7 @@ def _handle_list_documents() -> ToolResult:
 
 LIST_DOCUMENTS = ToolDefinition(
     name="list_documents",
-    description="List all open FreeCAD documents with object counts and active indicator.",
+    description=f"List all open {APP_NAME} documents with object counts and active indicator.",
     category="query",
     parameters=[],
     handler=_handle_list_documents,
@@ -3174,7 +3175,7 @@ def _handle_switch_document(document_name: str) -> ToolResult:
 
 SWITCH_DOCUMENT = ToolDefinition(
     name="switch_document",
-    description="Switch the active FreeCAD document by name or label.",
+    description=f"Switch the active {APP_NAME} document by name or label.",
     category="query",
     parameters=[
         ToolParam("document_name", "string", "Name or label of the document to activate"),
@@ -3656,7 +3657,7 @@ def _handle_execute_code(code: str) -> ToolResult:
 
 EXECUTE_CODE = ToolDefinition(
     name="execute_code",
-    description="Execute arbitrary Python code in FreeCAD's interpreter. LAST-RESORT fallback for operations no structured tool covers — check the tool list first. Do NOT use it to re-implement a covered operation (e.g. attaching a sketch to a face is `create_sketch`, not a hand-written AttachmentSupport macro). The code has access to FreeCAD, Part, PartDesign, Sketcher, Draft modules. Each call runs in a fresh namespace — variables, imports, and objects do NOT persist between calls, so make every call fully self-contained (re-fetch objects with getObject/getObjectsByLabel each time; a NameError means you referenced a name from an earlier call, not that your query was wrong).",
+    description=f"Execute arbitrary Python code in {APP_NAME}'s interpreter. LAST-RESORT fallback for operations no structured tool covers — check the tool list first. Do NOT use it to re-implement a covered operation (e.g. attaching a sketch to a face is `create_sketch`, not a hand-written AttachmentSupport macro). The code has access to FreeCAD, Part, PartDesign, Sketcher, Draft modules. Each call runs in a fresh namespace — variables, imports, and objects do NOT persist between calls, so make every call fully self-contained (re-fetch objects with getObject/getObjectsByLabel each time; a NameError means you referenced a name from an earlier call, not that your query was wrong).",
     category="general",
     parameters=[
         ToolParam("code", "string", "Python code to execute"),
@@ -3735,7 +3736,7 @@ def _handle_execute_code_headless(code: str, timeout=600) -> ToolResult:
 EXECUTE_CODE_HEADLESS = ToolDefinition(
     name="execute_code_headless",
     description=(
-        "Run Python in a separate FreeCAD console process, for long jobs "
+        f"Run Python in a separate {APP_NAME} console process, for long jobs "
         "(heavy booleans, batch exports, analyses) that would freeze the GUI "
         "under execute_code. It works on a COPY of the active document "
         "(unsaved edits included; App.ActiveDocument), or on a new empty "
@@ -3744,7 +3745,7 @@ EXECUTE_CODE_HEADLESS = ToolDefinition(
         "(the run folder, also the working directory); they stay there after "
         "the call. Returns what the code printed. FreeCADGui is a stub: view "
         "calls do nothing and Gui.Selection does not exist. "
-        "A crash in the code cannot take FreeCAD down. timeout defaults to 600 "
+        f"A crash in the code cannot take {APP_NAME} down. timeout defaults to 600 "
         "seconds; pass a smaller one for quick jobs, because some MCP clients "
         "give up after about 60 s."),
     category="general",
@@ -3818,10 +3819,10 @@ def _handle_run_macro(macro: str) -> ToolResult:
 RUN_MACRO = ToolDefinition(
     name="run_macro",
     description=(
-        "Run an EXISTING FreeCAD macro file and return its console output "
+        f"Run an EXISTING {APP_NAME} macro file and return its console output "
         "(stdout/stderr). Use this to execute a macro the user already has on "
         "disk, e.g. a test harness. In normal mode, pass a bare macro NAME "
-        "(without extension) that lives in FreeCAD's macro directory; file "
+        f"(without extension) that lives in {APP_NAME}'s macro directory; file "
         "paths are refused unless the user has enabled Dangerous mode. Use "
         "execute_code instead when you want to run code you are writing inline."
     ),
@@ -5645,7 +5646,7 @@ RUN_SKILL_SCRIPT = ToolDefinition(
     name="run_skill_script",
     description=(
         "Run a Python script that a skill ships in its folder (listed under "
-        "'Scripts' when the skill is loaded). It runs inside FreeCAD like a "
+        f"'Scripts' when the skill is loaded). It runs inside {APP_NAME} like a "
         "command-line program: `args` is split like a shell command line into "
         "sys.argv. Use the script path exactly as listed, e.g. 'scripts/make.py'."
     ),

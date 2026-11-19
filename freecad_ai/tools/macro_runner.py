@@ -6,11 +6,12 @@ Dangerous mode: any name or absolute/relative path, anywhere.
 from __future__ import annotations
 
 import os
+from ..branding import APP_NAME
 
 _DANGEROUS_HINT = (
     "Refused: in safe mode run_macro accepts only a bare macro name resolved "
-    "from FreeCAD's macro directories. Enable Dangerous mode to run arbitrary "
-    "file paths."
+    "from {}'s macro directories. Enable Dangerous mode to run arbitrary "
+    "file paths.".format(APP_NAME)
 )
 
 

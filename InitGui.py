@@ -9,20 +9,28 @@ class FreeCADAIWorkbench(Gui.Workbench):
 
     # FreeCAD auto-translates MenuText/ToolTip using class name as context.
     # The .qm file provides translations under the "FreeCADAIWorkbench" context.
+    # MenuText is the unbranded default; __init__ replaces it with the host's
+    # branded product name.
     MenuText = "FreeCAD AI"
     ToolTip = "AI-powered assistant for 3D modeling"
 
     def __init__(self):
+        from freecad_ai.branding import PRODUCT_NAME
         from freecad_ai.paths import get_icon_path
+        # Assigned here rather than in the class body: FreeCAD exec()s this
+        # file with separate globals/locals mappings, so class and function
+        # bodies cannot see module-level names. Same reason Icon is set here.
+        self.__class__.MenuText = PRODUCT_NAME
         icon = get_icon_path()
         if icon:
             self.__class__.Icon = icon
 
     def Initialize(self):
         """Called when the workbench is first activated."""
-        self.appendToolbar("FreeCAD AI", ["FreeCADAI_OpenChat", "FreeCADAI_OpenSettings",
+        from freecad_ai.branding import PRODUCT_NAME
+        self.appendToolbar(PRODUCT_NAME, ["FreeCADAI_OpenChat", "FreeCADAI_OpenSettings",
                                           "FreeCADAI_ToggleMCPServer"])
-        self.appendMenu("FreeCAD AI", ["FreeCADAI_OpenChat", "FreeCADAI_OpenSettings",
+        self.appendMenu(PRODUCT_NAME, ["FreeCADAI_OpenChat", "FreeCADAI_OpenSettings",
                                        "FreeCADAI_ToggleMCPServer",
                                        "FreeCADAI_ToggleKeepDock",
                                        "FreeCADAI_RestoreBackup"])
@@ -87,12 +95,13 @@ class OpenChatCommand:
     """Command to open/show the AI chat panel."""
 
     def GetResources(self):
+        from freecad_ai.branding import PRODUCT_NAME
         from freecad_ai.paths import get_icon_path
-        from freecad_ai.i18n import translate
+        from freecad_ai.i18n import translate, translate_branded
         d = {
-            "GroupName": "FreeCAD AI",
+            "GroupName": PRODUCT_NAME,
             "MenuText": translate("OpenChatCommand", "Open AI Chat"),
-            "ToolTip": translate("OpenChatCommand", "Open the FreeCAD AI chat panel"),
+            "ToolTip": translate_branded("OpenChatCommand", "Open the %2 chat panel"),
         }
         icon = get_icon_path()
         if icon:
@@ -114,11 +123,12 @@ class OpenSettingsCommand:
     """Command to open the settings dialog."""
 
     def GetResources(self):
-        from freecad_ai.i18n import translate
+        from freecad_ai.branding import PRODUCT_NAME
+        from freecad_ai.i18n import translate, translate_branded
         return {
-            "GroupName": "FreeCAD AI",
+            "GroupName": PRODUCT_NAME,
             "MenuText": translate("OpenSettingsCommand", "AI Settings"),
-            "ToolTip": translate("OpenSettingsCommand", "Configure FreeCAD AI providers and options"),
+            "ToolTip": translate_branded("OpenSettingsCommand", "Configure %2 providers and options"),
         }
 
     def Activated(self, index=0):
@@ -139,9 +149,10 @@ class RestoreBackupCommand:
     """
 
     def GetResources(self):
+        from freecad_ai.branding import PRODUCT_NAME
         from freecad_ai.i18n import translate
         return {
-            "GroupName": "FreeCAD AI",
+            "GroupName": PRODUCT_NAME,
             "MenuText": translate("RestoreBackupCommand", "Restore from Backup..."),
             "ToolTip": translate(
                 "RestoreBackupCommand",
@@ -167,13 +178,14 @@ class ToggleKeepDockCommand:
     """
 
     def GetResources(self):
-        from freecad_ai.i18n import translate
+        from freecad_ai.branding import PRODUCT_NAME
+        from freecad_ai.i18n import translate, translate_branded
         return {
-            "GroupName": "FreeCAD AI",
+            "GroupName": PRODUCT_NAME,
             "MenuText": translate("ToggleKeepDockCommand", "Keep Chat Panel Open"),
-            "ToolTip": translate(
+            "ToolTip": translate_branded(
                 "ToggleKeepDockCommand",
-                "Toggle whether the FreeCAD AI chat panel stays open when "
+                "Toggle whether the %2 chat panel stays open when "
                 "switching to other workbenches"),
             # False = starts unticked, matching the config default. FreeCAD
             # 1.1.x reads this as the action's *initial* state rather than as
@@ -231,14 +243,15 @@ class ToggleMCPServerCommand:
     """
 
     def GetResources(self):
-        from freecad_ai.i18n import translate
+        from freecad_ai.branding import PRODUCT_NAME
+        from freecad_ai.i18n import translate, translate_branded
         return {
-            "GroupName": "FreeCAD AI",
+            "GroupName": PRODUCT_NAME,
             "MenuText": translate("ToggleMCPServerCommand", "MCP Server"),
-            "ToolTip": translate(
+            "ToolTip": translate_branded(
                 "ToggleMCPServerCommand",
                 "Start or stop the MCP server, letting external clients such "
-                "as Claude Code drive this FreeCAD session. The server has no "
+                "as Claude Code drive this %1 session. The server has no "
                 "authentication unless a bearer token is configured; set its "
                 "address and token in AI Settings."),
             # False = starts unticked. FreeCAD treats this as the initial
@@ -254,7 +267,8 @@ class ToggleMCPServerCommand:
 
         if controller.is_running():
             controller.stop()
-            App.Console.PrintMessage("FreeCAD AI: MCP server stopped\n")
+            from freecad_ai.branding import PRODUCT_NAME
+            App.Console.PrintMessage("%s: MCP server stopped\n" % PRODUCT_NAME)
             self._sync_action()
             return
 
@@ -272,12 +286,13 @@ class ToggleMCPServerCommand:
             self._sync_action()  # a failed start must leave the button unticked
             return
 
+        from freecad_ai.branding import PRODUCT_NAME
         App.Console.PrintMessage(
-            "FreeCAD AI: MCP server listening on %s\n" % url)
+            "%s: MCP server listening on %s\n" % (PRODUCT_NAME, url))
         if auth_token:
             App.Console.PrintMessage(
-                "FreeCAD AI: MCP server requires a bearer token "
-                "(Authorization: Bearer ...)\n")
+                "%s: MCP server requires a bearer token "
+                "(Authorization: Bearer ...)\n" % PRODUCT_NAME)
         window = Gui.getMainWindow()
         if window:
             window.statusBar().showMessage(
@@ -300,14 +315,16 @@ class ToggleMCPServerCommand:
 
         This used to be a traceback in a daemon thread that nothing surfaced.
         """
-        from freecad_ai.i18n import translate
+        from freecad_ai.branding import PRODUCT_NAME
+        from freecad_ai.i18n import translate, translate_branded
         from freecad_ai.ui.compat import QtWidgets
-        message = translate(
+        message = translate_branded(
             "ToggleMCPServerCommand",
             "Could not start the MCP server on {address}.\n\n{error}\n\n"
-            "Change the address in FreeCAD AI → AI Settings → "
+            "Change the address in %2 → AI Settings → "
             "MCP Servers.").format(address="%s:%d" % (host, port), error=exc)
-        App.Console.PrintError("FreeCAD AI: %s\n" % message.replace("\n\n", " "))
+        App.Console.PrintError(
+            "%s: %s\n" % (PRODUCT_NAME, message.replace("\n\n", " ")))
         QtWidgets.QMessageBox.warning(
             Gui.getMainWindow(),
             translate("ToggleMCPServerCommand", "MCP server failed to start"),
@@ -350,14 +367,16 @@ except Exception:
 # Register the FreeCAD AI pages in Edit → Preferences: the same four pages
 # the Settings dialog shows, writing config.json directly (#99, #101).
 try:
+    from freecad_ai.branding import PRODUCT_NAME as _pn
     from freecad_ai.ui import prefs_page as _pp
     for _cls in (_pp.FreeCADAIProviderPrefs, _pp.FreeCADAIBehaviorPrefs,
                  _pp.FreeCADAIToolsPrefs, _pp.FreeCADAIMcpPrefs):
-        Gui.addPreferencePage(_cls, "FreeCAD AI")
+        Gui.addPreferencePage(_cls, _pn)
 except Exception as _e:
     import FreeCAD as _App
+    from freecad_ai.branding import PRODUCT_NAME as _pn
     _App.Console.PrintWarning(
-        f"FreeCAD AI: preferences pages not registered: {_e}\n")
+        f"{_pn}: preferences pages not registered: {_e}\n")
 
 Gui.addCommand("FreeCADAI_OpenChat", OpenChatCommand())
 Gui.addCommand("FreeCADAI_OpenSettings", OpenSettingsCommand())
@@ -386,8 +405,9 @@ try:
                     warn=lambda m: _App.Console.PrintWarning(m + "\n")):
                 set_command_checked("FreeCADAI_ToggleMCPServer", True)
         except Exception as e:
+            from freecad_ai.branding import PRODUCT_NAME
             _App.Console.PrintWarning(
-                "FreeCAD AI: MCP server autostart failed: %s\n" % e)
+                "%s: MCP server autostart failed: %s\n" % (PRODUCT_NAME, e))
 
     from freecad_ai.ui.compat import QtCore as _QtCore
     _QtCore.QTimer.singleShot(0, _autostart_mcp)

@@ -21,6 +21,7 @@ from .transport import (
     StreamableHTTPClientTransport,
     _LOOPBACK_HOSTS,
 )
+from ..branding import PRODUCT_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ logger = logging.getLogger(__name__)
 # deliberately not protocol.DEFAULT_PROTOCOL_VERSION, which is what our own
 # *server* answers a client that named no version and must stay 2025-03-26.
 PROTOCOL_VERSION = protocol.LATEST_LEGACY_VERSION
-CLIENT_INFO = {"name": "FreeCAD AI", "version": "0.1.0"}
+CLIENT_INFO = {"name": PRODUCT_NAME, "version": "0.1.0"}
 
 # How long to leave a server alone after a re-listing fails. It overrides the
 # server's own ttlMs, which is a freshness promise about a list it managed to

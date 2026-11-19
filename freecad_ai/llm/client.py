@@ -1056,7 +1056,8 @@ class LLMClient:
         logger.info(msg)
         try:
             import FreeCAD as _App
-            _App.Console.PrintMessage("[FreeCAD AI] {}\n".format(msg))
+            from ..branding import PRODUCT_NAME
+            _App.Console.PrintMessage("[{}] {}\n".format(PRODUCT_NAME, msg))
         except Exception:
             pass
 
@@ -1075,8 +1076,9 @@ class LLMClient:
         if url.startswith("https") and not _HAS_SSL:
             raise LLMError(
                 "HTTPS is not available (Python _ssl module missing). "
-                "This can happen with snap-packaged FreeCAD. "
-                "Use Ollama (http://localhost:11434) or fix the snap's Python SSL support."
+                "This can happen when the host application ships a Python built "
+                "without SSL support (e.g. snap packages). "
+                "Use Ollama (http://localhost:11434) or fix that Python's SSL support."
             )
 
     def _get_retry_delay(self, error: urllib.error.HTTPError, attempt: int) -> float:

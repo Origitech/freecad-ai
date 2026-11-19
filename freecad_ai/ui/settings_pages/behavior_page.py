@@ -1,7 +1,7 @@
 """Behavior page: Limits, Behavior, and System Prompt."""
 
 from ..compat import QtWidgets, QtCore
-from ...i18n import translate
+from ...i18n import translate, translate_branded
 from .base import SettingsPage
 
 QVBoxLayout = QtWidgets.QVBoxLayout
@@ -113,11 +113,11 @@ class BehaviorPage(SettingsPage):
         self.keep_dock_check = QCheckBox(
             translate("SettingsDialog", "Keep chat panel open when switching workbenches")
         )
-        self.keep_dock_check.setToolTip(translate(
+        self.keep_dock_check.setToolTip(translate_branded(
             "SettingsDialog",
-            "When enabled, the FreeCAD AI chat panel stays docked and usable "
+            "When enabled, the %2 chat panel stays docked and usable "
             "in other workbenches instead of hiding when you leave the "
-            "FreeCAD AI workbench."))
+            "%2 workbench."))
         behavior_layout.addWidget(self.keep_dock_check)
 
         # Thinking mode

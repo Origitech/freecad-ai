@@ -25,6 +25,7 @@ import traceback
 from dataclasses import dataclass
 
 from ..utils.proc import hidden_process_kwargs
+from ..branding import APP_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -111,8 +112,9 @@ def _console_capture_warning(result) -> str | None:
         return None
     return (
         "Sandbox console capture unavailable ({}). Pre-execution checks still "
-        "validate object state, but FreeCAD errors printed by the C++ layer "
-        "without raising a Python exception will not be detected.".format(status)
+        "validate object state, but {} errors printed by the C++ layer "
+        "without raising a Python exception will not be detected.".format(
+            status, APP_NAME)
     )
 
 
@@ -580,8 +582,8 @@ def _sandbox_test(code: str, timeout: int = 15, document_path: str | None = None
             sig = -proc.returncode
             sig_name = signal.Signals(sig).name if sig in signal.Signals._value2member_map_ else str(sig)
             return False, (
-                "Sandbox: code CRASHED FreeCAD (signal {}). "
-                "This code is not safe to execute.".format(sig_name)
+                "Sandbox: code CRASHED {} (signal {}). "
+                "This code is not safe to execute.".format(APP_NAME, sig_name)
             )
 
         # Read result
@@ -607,7 +609,7 @@ def _sandbox_test(code: str, timeout: int = 15, document_path: str | None = None
                 problems.append(result["error"])
             if console_errors:
                 problems.append(
-                    "FreeCAD logged errors while running this code:\n"
+                    "{} logged errors while running this code:\n".format(APP_NAME)
                     + "\n".join(console_errors))
             return False, "Sandbox: " + "\n".join(problems)
 
@@ -783,8 +785,8 @@ def execute_code(code: str, timeout: int | None = None, sandbox: bool = True,
             success=False,
             stdout="",
             stderr=(
-                "No active document — open a document in FreeCAD or click "
-                "its tab so it is the focused window."
+                "No active document — open a document in {} or click "
+                "its tab so it is the focused window.".format(APP_NAME)
             ),
             code=code,
         )

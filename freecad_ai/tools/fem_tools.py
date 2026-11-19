@@ -4,6 +4,7 @@ import json
 import os
 
 from .registry import ToolParam, ToolDefinition, ToolResult
+from ..branding import APP_NAME
 
 
 def _handle_run_fem_analysis(analysis="", mesh_size="", timeout=600) -> ToolResult:
@@ -58,7 +59,7 @@ RUN_FEM_ANALYSIS = ToolDefinition(
     name="run_fem_analysis",
     description=(
         "Solve an existing FEM analysis (Fem::FemAnalysis) with CalculiX in a "
-        "separate FreeCAD process and return max von Mises stress (MPa), max "
+        f"separate {APP_NAME} process and return max von Mises stress (MPa), max "
         "displacement (mm) and mesh size. Set up the analysis first with "
         "execute_code: material, fixed constraint, loads. A missing CalculiX "
         "solver is added for the run; a Gmsh mesh is (re)generated every time, "

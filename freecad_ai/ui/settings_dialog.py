@@ -7,7 +7,7 @@ cannot work. The pages own every field; OK writes only what changed.
 """
 
 from .compat import QtWidgets
-from ..i18n import translate
+from ..i18n import translate, translate_branded
 
 QDialog = QtWidgets.QDialog
 QVBoxLayout = QtWidgets.QVBoxLayout
@@ -19,6 +19,7 @@ QMessageBox = QtWidgets.QMessageBox
 from ..config import get_config, notify_config_changed, save_current_config
 from .provider_section import ProviderSection
 from .settings_pages import BehaviorPage, McpPage, ProviderPage, ToolsPage
+from ..branding import PRODUCT_NAME
 
 
 class SettingsDialog(QDialog):
@@ -26,7 +27,7 @@ class SettingsDialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle(translate("SettingsDialog", "FreeCAD AI Settings"))
+        self.setWindowTitle(translate_branded("SettingsDialog", "%2 Settings"))
         self.setMinimumHeight(400)
         self._build_ui()
         # Width comes from the built layout, never a constant. The profile
@@ -115,7 +116,7 @@ class SettingsDialog(QDialog):
                 try:
                     import FreeCAD
                     FreeCAD.Console.PrintError(
-                        f"FreeCAD AI: {type(page).__name__} settings failed "
+                        f"{PRODUCT_NAME}: {type(page).__name__} settings failed "
                         f"to load: {e}\n")
                 except ImportError:
                     pass

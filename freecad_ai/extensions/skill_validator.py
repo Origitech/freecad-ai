@@ -8,6 +8,7 @@ import math
 import re
 from dataclasses import dataclass, field
 from typing import Any, Optional
+from ..branding import APP_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -540,8 +541,9 @@ def _run_single_check(
             except ImportError:
                 return CheckResult(
                     target=target, check=check, passed=False,
-                    expected=str(expected_area), actual="FreeCAD not available",
-                    message="section_area: FreeCAD not available",
+                    expected=str(expected_area),
+                    actual="{} not available".format(APP_NAME),
+                    message="section_area: {} not available".format(APP_NAME),
                 )
             direction = FreeCAD.Vector(*axis_map[axis_name])
             wires = obj.Shape.slice(direction, offset)

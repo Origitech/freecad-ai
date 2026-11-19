@@ -17,6 +17,7 @@ import logging
 import re
 
 from ..config import profile_supports_tools, profile_supports_vision
+from ..branding import PRODUCT_NAME
 from .client import LLMError, create_client
 
 logger = logging.getLogger(__name__)
@@ -115,7 +116,7 @@ class FallbackWalker:
             i, label = self.cursor, self.chain[self.cursor]
             reason = self._missing(i)
             if reason:
-                logger.warning("FreeCAD AI: %s skipped — %s", label, reason)
+                logger.warning("%s: %s skipped — %s", PRODUCT_NAME, label, reason)
                 self._record(round_no, label, "skipped", reason)
                 self._segments.append(f"{label} skipped ({reason})")
                 self._failures.append(f"{label}: skipped ({reason})")
@@ -132,11 +133,11 @@ class FallbackWalker:
                     raise
                 reason = short_reason(exc)
                 if i + 1 < len(self.chain):
-                    logger.warning("FreeCAD AI: %s failed — %s; trying %s",
-                                   label, reason, self.chain[i + 1])
+                    logger.warning("%s: %s failed — %s; trying %s",
+                                   PRODUCT_NAME, label, reason, self.chain[i + 1])
                 else:
-                    logger.warning("FreeCAD AI: %s failed — %s; no profile left",
-                                   label, reason)
+                    logger.warning("%s: %s failed — %s; no profile left",
+                                   PRODUCT_NAME, label, reason)
                 self._record(round_no, label, "failed", reason)
                 if getattr(exc, "kind", "config") == "unreachable":
                     self._segments.append(f"{label} couldn't be reached ({reason})")
@@ -147,8 +148,8 @@ class FallbackWalker:
                 continue
             self._record(round_no, label, "answered")
             if self._segments:
-                logger.warning("FreeCAD AI: answered by %s (fallback %d of %d)",
-                               label, i, len(self.chain) - 1)
+                logger.warning("%s: answered by %s (fallback %d of %d)",
+                               PRODUCT_NAME, label, i, len(self.chain) - 1)
                 self._on_note("⚠ " + "; ".join(self._segments)
                               + f" — answered by {label}")
                 self._segments = []

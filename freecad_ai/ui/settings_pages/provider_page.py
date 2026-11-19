@@ -7,6 +7,7 @@ from ...config import get_config, PROVIDER_PRESETS
 from ...llm.client import take_max_tokens_row
 from ..provider_section import ProviderSection
 from .base import SettingsPage
+from ...branding import PRODUCT_NAME
 
 QWidget = QtWidgets.QWidget
 QVBoxLayout = QtWidgets.QVBoxLayout
@@ -656,7 +657,7 @@ class ProviderPage(SettingsPage):
         # Log to FreeCAD console
         try:
             import FreeCAD
-            FreeCAD.Console.PrintMessage(f"FreeCAD AI: {vision_msg}\n")
+            FreeCAD.Console.PrintMessage(f"{PRODUCT_NAME}: {vision_msg}\n")
         except ImportError:
             pass
 
@@ -685,6 +686,6 @@ class ProviderPage(SettingsPage):
             self.test_status.setText(self.test_status.text() + "\n" + line)
             try:
                 import FreeCAD
-                FreeCAD.Console.PrintMessage(f"FreeCAD AI: {line}\n")
+                FreeCAD.Console.PrintMessage(f"{PRODUCT_NAME}: {line}\n")
             except ImportError:
                 pass
