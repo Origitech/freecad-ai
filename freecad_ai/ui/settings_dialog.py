@@ -41,11 +41,49 @@ class SettingsDialog(QDialog):
         # always there, and why its width has to be added on: sizeHint()
         # does not reserve room for it, leaving the form overflowing by
         # exactly one scrollbar and growing a horizontal one to say so.
-        width = self.sizeHint().width() + self.style().pixelMetric(
-            QtWidgets.QStyle.PM_ScrollBarExtent)
+        width = self._content_width() + self._scrollbar_width()
+        width = min(width, self._screen_width_limit())
         self.setMinimumWidth(width)
         self.resize(width, 700)
         self._load_from_config()
+
+    def _content_width(self) -> int:
+        """Width the form needs, measured on the form itself.
+
+        Not just self.sizeHint(): the dialog's hint is mostly the scroll
+        area's, and QScrollArea caps its sizeHint at 36 times the font height
+        (Qt's QScrollArea::sizeHint), about 540-580 px whatever the form holds.
+        Under a stylesheet that pads its controls the form outgrows that, and
+        the dialog opened too narrow despite sizing itself from the layout.
+        """
+        self.ensurePolished()  # count the stylesheet's padding, not the bare style's
+        margins = self.layout().contentsMargins()
+        form = (self._scroll.widget().sizeHint().width()
+                + 2 * self._scroll.frameWidth()
+                + margins.left() + margins.right())
+        return max(self.sizeHint().width(), form)
+
+    def _scrollbar_width(self) -> int:
+        """Width of the vertical scrollbar as it will actually be drawn.
+
+        The style's PM_ScrollBarExtent ignores stylesheets, and a themed
+        scrollbar can be wider (15 px against 12 in one host's theme): the
+        difference is exactly what the form then overflows by.
+        """
+        bar = self._scroll.verticalScrollBar()
+        bar.ensurePolished()
+        return max(self.style().pixelMetric(QtWidgets.QStyle.PM_ScrollBarExtent),
+                   bar.sizeHint().width())
+
+    def _screen_width_limit(self) -> int:
+        """Widest the dialog may open: a dialog wider than the screen hides
+        Save and Cancel, which is worse than a horizontal scrollbar."""
+        screen = self.screen() if hasattr(self, "screen") else None
+        if screen is None:
+            screen = QtWidgets.QApplication.primaryScreen()
+        if screen is None:
+            return 1 << 30
+        return int(screen.availableGeometry().width() * 0.9)
 
     def _build_ui(self):
         outer_layout = QVBoxLayout(self)
@@ -58,6 +96,7 @@ class SettingsDialog(QDialog):
         layout = QVBoxLayout(scroll_widget)
         layout.setContentsMargins(0, 0, 0, 0)
         scroll.setWidget(scroll_widget)
+        self._scroll = scroll  # read by _content_width()
         outer_layout.addWidget(scroll, 1)  # stretch factor 1 — takes available space
 
         # LLM Provider + Utility models, Model Parameters table, and the

@@ -72,3 +72,16 @@ def test_the_content_fits_without_a_horizontal_scrollbar(dialog):
                 or area.widget().sizeHint().width()
                 <= area.viewport().width()), (
             "settings content is wider than its viewport")
+
+
+def test_the_width_is_measured_on_the_form_not_the_scroll_area(dialog):
+    # QScrollArea caps its own sizeHint at 36 x the font height, so a width
+    # taken from the dialog's hint stopped growing at about 540-580 px and a
+    # padded stylesheet overflowed it. Unlike the checks above this holds at
+    # any font size, because it allows for the screen limit the dialog
+    # applies on purpose.
+    area = dialog.findChildren(QtWidgets.QScrollArea)[0]
+    wanted = area.widget().sizeHint().width()
+    allowed = dialog._screen_width_limit() - dialog._scrollbar_width()
+    assert dialog.width() >= min(wanted, allowed), (
+        "the dialog is narrower than its own form")
